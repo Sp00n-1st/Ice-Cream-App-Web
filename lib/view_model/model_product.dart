@@ -234,7 +234,7 @@ class _ModelProductState extends State<ModelProduct> {
                                 onPressed: () {
                                   setState(() {
                                     Get.to(EditPage(
-                                      product: widget.product,
+                                      productModel: widget.product,
                                       id: widget.id,
                                     ));
                                   });

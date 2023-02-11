@@ -1,14 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:side_navigation/side_navigation.dart';
+import '../controller/controller.dart';
+import '../service/database.dart';
 import 'dashboard_main.dart';
 import 'order_page.dart';
 import 'transaction_page.dart';
 import 'product_page.dart';
 import 'upload_page.dart';
 import 'user_page.dart';
-import '../service/database.dart';
 
 // ignore: must_be_immutable
 class MainView extends StatelessWidget {
@@ -18,8 +20,9 @@ class MainView extends StatelessWidget {
   Widget build(BuildContext context) {
     double sizeHeight = MediaQuery.of(context).size.height;
     double sizeWidth = MediaQuery.of(context).size.width;
+    var controller = Get.put(Controller());
 
-    int selectedIndex = position ?? 0;
+    controller.selectedIndex.value = position ?? 0;
 
     List<Widget> views = [
       const DashboardMain(),
@@ -28,7 +31,7 @@ class MainView extends StatelessWidget {
             child: Container(
                 margin: EdgeInsets.only(
                     top: 50, left: sizeWidth / 20, right: sizeWidth / 4),
-                child: const UploadPage())),
+                child: UploadPage())),
       ),
       const ProductPage(),
       UserPage(),
@@ -36,61 +39,61 @@ class MainView extends StatelessWidget {
       Transaction()
     ];
 
-    return StatefulBuilder(
-      builder: (context, setState) => Scaffold(
-        backgroundColor: const Color(0xffEAEAEA),
-        appBar: AppBar(
-          actions: [
-            Container(
-              margin: const EdgeInsets.only(right: 20),
-              child: IconButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return CupertinoAlertDialog(
-                          title: Text(
-                            'Are Sure To Logout ?',
-                            style: GoogleFonts.poppins(fontSize: 18),
-                          ),
-                          content: const Icon(
-                            Icons.logout_rounded,
-                            size: 50,
-                          ),
-                          actions: [
-                            MaterialButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: Text(
-                                'No',
-                                style: GoogleFonts.poppins(fontSize: 14),
-                              ),
+    return Scaffold(
+      backgroundColor: const Color(0xffEAEAEA),
+      appBar: AppBar(
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 20),
+            child: IconButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return CupertinoAlertDialog(
+                        title: Text(
+                          'Are Sure To Logout ?',
+                          style: GoogleFonts.poppins(fontSize: 18),
+                        ),
+                        content: const Icon(
+                          Icons.logout_rounded,
+                          size: 50,
+                        ),
+                        actions: [
+                          MaterialButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              'No',
+                              style: GoogleFonts.poppins(fontSize: 14),
                             ),
-                            MaterialButton(
-                              onPressed: () {
-                                DataBaseServices().logoutAuth();
-                                Navigator.pop(context);
-                              },
-                              child: Text(
-                                'Yes',
-                                style: GoogleFonts.poppins(fontSize: 14),
-                              ),
-                            )
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  icon: const Icon(Icons.logout)),
-            )
-          ],
-          title: Text(
-            'Sweet Dream Admin Control',
-            style: GoogleFonts.poppins(),
-          ),
+                          ),
+                          MaterialButton(
+                            onPressed: () {
+                              DataBaseServices().logoutAuth();
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              'Yes',
+                              style: GoogleFonts.poppins(fontSize: 14),
+                            ),
+                          )
+                        ],
+                      );
+                    },
+                  );
+                },
+                icon: const Icon(Icons.logout)),
+          )
+        ],
+        title: Text(
+          'Sweet Dream Admin Control',
+          style: GoogleFonts.poppins(),
         ),
-        body: Row(
+      ),
+      body: Obx(
+        () => Row(
           children: [
             SideNavigationBar(
               theme: SideNavigationBarTheme(
@@ -101,7 +104,7 @@ class MainView extends StatelessWidget {
                     unselectedItemColor: Colors.white),
                 dividerTheme: SideNavigationBarDividerTheme.standard(),
               ),
-              selectedIndex: selectedIndex,
+              selectedIndex: controller.selectedIndex.value,
               items: const [
                 SideNavigationBarItem(
                   icon: Icons.dashboard,
@@ -129,21 +132,19 @@ class MainView extends StatelessWidget {
                 ),
               ],
               onTap: (index) {
-                setState(() {
-                  selectedIndex = index;
-                });
+                controller.selectedIndex.value = index;
               },
             ),
-            selectedIndex == 2
+            controller.selectedIndex.value == 2
                 ? Align(
                     alignment: Alignment.topCenter,
                     child: SizedBox(
                         width: sizeWidth / 1.99,
                         height: sizeHeight,
-                        child: views.elementAt(selectedIndex)),
+                        child: views.elementAt(controller.selectedIndex.value)),
                   )
                 : Expanded(
-                    child: views.elementAt(selectedIndex),
+                    child: views.elementAt(controller.selectedIndex.value),
                   )
           ],
         ),

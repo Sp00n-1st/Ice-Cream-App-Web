@@ -1,10 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../model/user.dart';
+import '../controller/controller.dart';
 import '../service/database.dart';
-import '../utils/globals.dart' as globals;
 
 class LoginPage extends StatelessWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -13,18 +12,11 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     double sizeHeight = MediaQuery.of(context).size.height;
     double sizeWidth = MediaQuery.of(context).size.width;
-    String? email;
-    TextEditingController emailController = TextEditingController();
-    TextEditingController passwordController = TextEditingController();
-    FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-    Query<UserAccount> user = firestore
-        .collection('user')
-        .where('email', isEqualTo: email)
-        .withConverter<UserAccount>(
-            fromFirestore: (snapshot, _) =>
-                UserAccount.fromJson(snapshot.data()),
-            toFirestore: (userAccount, _) => userAccount.toJson());
+    TextEditingController emailController =
+        TextEditingController(text: 'icecream@gmail.com');
+    TextEditingController passwordController =
+        TextEditingController(text: '123456');
+    var controller = Get.put(Controller());
 
     return Scaffold(
       //backgroundColor: const Color(0xfffad755),
@@ -113,7 +105,8 @@ class LoginPage extends StatelessWidget {
                                 await FirebaseAuth.instance
                                     .sendPasswordResetEmail(email: '');
                               } on FirebaseAuthException catch (e) {
-                                showNotification(context, e.message.toString());
+                                controller.showNotification(
+                                    context, e.message.toString());
                               }
                             },
                             child: Text(
@@ -126,82 +119,44 @@ class LoginPage extends StatelessWidget {
                       ),
                       Center(
                         child: SizedBox(
-                          width: sizeWidth / 5.5,
-                          height: sizeHeight * 0.1,
-                          child: StreamBuilder<QuerySnapshot<UserAccount>>(
-                              stream: user.snapshots(),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasError) {
-                                  return Center(
-                                    child: Text(snapshot.error.toString()),
-                                  );
+                          width: sizeWidth / 6,
+                          height: sizeHeight * 0.06,
+                          child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  shape: const StadiumBorder()),
+                              onPressed: () async {
+                                if (FirebaseAuth.instance.currentUser == null) {
+                                  try {
+                                    controller.isLogin.value =
+                                        !controller.isLogin.value;
+                                    await DataBaseServices().loginAdmin(
+                                        context,
+                                        emailController.text,
+                                        passwordController.text);
+                                  } on FirebaseAuthException catch (e) {
+                                    controller.isLogin.value =
+                                        !controller.isLogin.value;
+                                    controller.showNotification(
+                                        context, e.message.toString());
+                                  }
+                                } else {
+                                  await FirebaseAuth.instance.signOut();
                                 }
-                                if (!snapshot.hasData) {
-                                  return const Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }
-                                return ListView.builder(
-                                  itemCount: 1,
-                                  itemBuilder: (context, index) =>
-                                      StatefulBuilder(
-                                    builder: (context, setState) => SizedBox(
-                                      width: sizeWidth / 6,
-                                      height: sizeHeight * 0.06,
-                                      child: ElevatedButton(
-                                          style: ElevatedButton.styleFrom(
-                                              shape: const StadiumBorder()),
-                                          onPressed: () async {
-                                            setState(
-                                              () {
-                                                email = emailController.text;
-                                              },
-                                            );
-                                            if (FirebaseAuth
-                                                    .instance.currentUser ==
-                                                null) {
-                                              try {
-                                                setState(
-                                                  () {
-                                                    globals.isLogin =
-                                                        !globals.isLogin;
-                                                  },
-                                                );
-                                                await DataBaseServices()
-                                                    .loginAdmin(
-                                                        context,
-                                                        emailController.text,
-                                                        passwordController
-                                                            .text);
-                                              } on FirebaseAuthException catch (e) {
-                                                setState(
-                                                  () {
-                                                    globals.isLogin =
-                                                        !globals.isLogin;
-                                                  },
-                                                );
-                                                showNotification(context,
-                                                    e.message.toString());
-                                              }
-                                            } else {
-                                              await FirebaseAuth.instance
-                                                  .signOut();
-                                            }
-                                          },
-                                          child: (globals.isLogin == false)
-                                              ? Text(
-                                                  'Login',
-                                                  style: GoogleFonts.poppins(
-                                                      fontSize: 18),
-                                                )
-                                              : const CircularProgressIndicator(
-                                                  color: Colors.black,
-                                                  backgroundColor: Colors.white,
-                                                )),
-                                    ),
-                                  ),
-                                );
-                              }),
+                              },
+                              child: Obx(
+                                () {
+                                  return (controller.isLogin.value == false)
+                                      ? Text(
+                                          'Login',
+                                          style:
+                                              GoogleFonts.poppins(fontSize: 18),
+                                        )
+                                      : const CircularProgressIndicator(
+                                          color: Colors.black,
+                                          backgroundColor: Colors.white,
+                                        );
+                                },
+                              )),
                         ),
                       )
                     ],
@@ -223,10 +178,4 @@ class LoginPage extends StatelessWidget {
       ),
     );
   }
-}
-
-void showNotification(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      backgroundColor: Colors.orange.shade900,
-      content: Text(message.toString())));
 }

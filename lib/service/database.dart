@@ -4,15 +4,16 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_web_firebase/controller/controller.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oktoast/oktoast.dart';
 import '../model/user.dart';
-import '../utils/globals.dart' as globals;
 import '../view/login_page.dart';
 import '../view/main_view.dart';
 
 class DataBaseServices {
+  var controller = Get.put(Controller());
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   String? downloadUrl;
   Future<String?> getData(String loc) async {
@@ -39,12 +40,12 @@ class DataBaseServices {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
       Get.off(MainView());
-      globals.isLogin = !globals.isLogin;
+      controller.isLogin.value = !controller.isLogin.value;
       showToast('Login Success',
           position: const ToastPosition(align: Alignment.bottomCenter),
           backgroundColor: const Color(0xff00AA13));
     } else {
-      globals.isLogin = !globals.isLogin;
+      controller.isLogin.value = !controller.isLogin.value;
       showCupertinoDialog(
         context: context!,
         builder: (context) {
@@ -82,7 +83,7 @@ class DataBaseServices {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
       Get.off(MainView());
-      globals.isLogin = !globals.isLogin;
+      controller.isLogin.value = !controller.isLogin.value;
       showToast('Login Success',
           position: const ToastPosition(align: Alignment.bottomCenter),
           backgroundColor: const Color(0xff00AA13));
@@ -90,12 +91,12 @@ class DataBaseServices {
       await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
       Get.off(MainView());
-      globals.isLogin = !globals.isLogin;
+      controller.isLogin.value = !controller.isLogin.value;
       showToast('Login Success',
           position: const ToastPosition(align: Alignment.bottomCenter),
           backgroundColor: const Color(0xff00AA13));
     } else {
-      globals.isLogin = !globals.isLogin;
+      controller.isLogin.value = !controller.isLogin.value;
       showCupertinoDialog(
         context: context!,
         builder: (context) {
@@ -145,7 +146,7 @@ class DataBaseServices {
         email, encryptPass, auth.currentUser!.uid, firstName, lastName);
 
     Get.offAll(MainView());
-    globals.isLogin = !globals.isLogin;
+    controller.isLogin.value = !controller.isLogin.value;
     showToast('Register Success',
         position: const ToastPosition(align: Alignment.bottomCenter));
   }
