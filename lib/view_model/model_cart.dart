@@ -25,7 +25,7 @@ class ModelCart extends StatelessWidget {
   List<Widget> listAvalaible = <Widget>[];
   List<Widget> listPrice = <Widget>[];
   List<bool?> available = <bool?>[];
-  bool? isAvailable;
+  bool? isAvailable = null;
   bool isReady = false;
 
   @override
