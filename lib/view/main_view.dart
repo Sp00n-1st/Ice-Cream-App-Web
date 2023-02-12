@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:side_navigation/side_navigation.dart';
+import '../controller/auth_controller.dart';
 import '../controller/controller.dart';
-import '../service/database.dart';
 import 'dashboard_main.dart';
 import 'order_page.dart';
 import 'transaction_page.dart';
@@ -21,6 +21,7 @@ class MainView extends StatelessWidget {
     double sizeHeight = MediaQuery.of(context).size.height;
     double sizeWidth = MediaQuery.of(context).size.width;
     var controller = Get.put(Controller());
+    var authController = Get.put(AuthController());
 
     controller.selectedIndex.value = position ?? 0;
 
@@ -31,7 +32,7 @@ class MainView extends StatelessWidget {
             child: Container(
                 margin: EdgeInsets.only(
                     top: 50, left: sizeWidth / 20, right: sizeWidth / 4),
-                child: UploadPage())),
+                child: const UploadPage())),
       ),
       const ProductPage(),
       UserPage(),
@@ -71,7 +72,7 @@ class MainView extends StatelessWidget {
                           ),
                           MaterialButton(
                             onPressed: () {
-                              DataBaseServices().logoutAuth();
+                              authController.logoutAuth();
                               Navigator.pop(context);
                             },
                             child: Text(

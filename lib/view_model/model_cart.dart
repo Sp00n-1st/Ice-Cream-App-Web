@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:oktoast/oktoast.dart';
+import '../controller/controller.dart';
 import 'textbox_cart.dart';
 import '../model/order.dart';
 
@@ -22,19 +24,22 @@ class ModelCart extends StatelessWidget {
   List<Widget> listDiscount = <Widget>[];
   List<Widget> listTotal = <Widget>[];
   List<Widget> listSubtotal = <Widget>[];
-  List<Widget> listAvalaible = <Widget>[];
   List<Widget> listPrice = <Widget>[];
-  List<bool?> available = <bool?>[];
-  bool? isAvailable = null;
-  bool isReady = false;
+  List<Widget> listAvalaible = <Widget>[].obs;
+  List<bool?> available = <bool?>[].obs;
 
   @override
   Widget build(BuildContext context) {
+    bool isReady = false;
     double sizeWidth = MediaQuery.of(context).size.width;
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     final user = firestore.collection('user');
     var productInfo = FirebaseFirestore.instance.collection('product');
     final orderRef = firestore.collection('order');
+    var controller = Get.put(Controller());
+    var isTake = false.obs;
+    controller.isTake.value = cart.isTake;
+    isTake.value = cart.isTake;
 
     for (int i = 0; i < cart.idProduct.length; i++) {
       String path = cart.idProduct[i];
@@ -101,68 +106,60 @@ class ModelCart extends StatelessWidget {
     }
 
     for (int i = 0; i < cart.idProduct.length; i++) {
+      var isAvailable = Rxn<bool>();
       listAvalaible.add(SizedBox(
-        width: sizeWidth / 9,
-        child: StatefulBuilder(
-          builder: (context, setState) {
-            return (isAvailable == null)
-                ? Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                          onPressed: () {
-                            setState(
-                              () {
-                                isAvailable = true;
-                                available[i] = true;
-                              },
-                            );
-                          },
-                          icon: const Icon(
-                            CupertinoIcons.checkmark_alt_circle,
-                            color: Colors.green,
-                          )),
-                      IconButton(
-                          onPressed: () {
-                            setState(
-                              () {
-                                isAvailable = false;
-                                available[i] = false;
-                              },
-                            );
-                          },
-                          icon: const Icon(
-                            CupertinoIcons.clear_circled,
-                            color: Colors.red,
-                          ))
-                    ],
-                  )
-                : isAvailable == false
-                    ? Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                              onPressed: () {},
-                              icon: const Icon(
-                                CupertinoIcons.clear_circled,
-                                color: Colors.red,
-                              ))
-                        ],
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                              onPressed: () {},
-                              icon: const Icon(
-                                CupertinoIcons.checkmark_alt_circle,
-                                color: Colors.green,
-                              )),
-                        ],
-                      );
-          },
-        ),
-      ));
+          width: sizeWidth / 9,
+          child: Obx(
+            () {
+              return (isAvailable.value == null)
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                            onPressed: () {
+                              isAvailable.value = true;
+                              available[i] = true;
+                            },
+                            icon: const Icon(
+                              CupertinoIcons.checkmark_alt_circle,
+                              color: Colors.green,
+                            )),
+                        IconButton(
+                            onPressed: () {
+                              isAvailable.value = false;
+                              available[i] = false;
+                            },
+                            icon: const Icon(
+                              CupertinoIcons.clear_circled,
+                              color: Colors.red,
+                            ))
+                      ],
+                    )
+                  : isAvailable.value == false
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                                onPressed: () {},
+                                icon: const Icon(
+                                  CupertinoIcons.clear_circled,
+                                  color: Colors.red,
+                                ))
+                          ],
+                        )
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            IconButton(
+                                onPressed: () {},
+                                icon: const Icon(
+                                  CupertinoIcons.checkmark_alt_circle,
+                                  color: Colors.green,
+                                )),
+                          ],
+                        );
+            },
+          )));
     }
 
     return cart.isReady == false
@@ -204,125 +201,111 @@ class ModelCart extends StatelessWidget {
                     TextboxCart(list: listSubtotal, size: sizeWidth / 15),
                     TextboxCart(list: listTotal, size: sizeWidth / 15),
                     TextboxCart(list: listAvalaible, size: sizeWidth / 9),
-                    StatefulBuilder(
-                      builder: (context, setState) {
-                        return Container(
-                            margin: const EdgeInsets.only(left: 25),
-                            width: sizeWidth / 15,
-                            alignment: Alignment.center,
-                            child: (cart.isTake == false)
-                                ? SizedBox(
-                                    width: sizeWidth / 16,
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                          shape: const StadiumBorder()),
-                                      onPressed: () {
-                                        setState(
-                                          () {
-                                            cart.isTake = !cart.isTake;
-                                            isReady = !isReady;
-                                            orderRef.doc(id).update(
-                                                ({'isTake': cart.isTake}));
-                                          },
-                                        );
-                                      },
-                                      child: Text(
-                                        'Take',
-                                        style: GoogleFonts.poppins(),
-                                      ),
-                                    ),
-                                  )
-                                : ElevatedButton(
+                    Obx(
+                      () => Container(
+                          margin: const EdgeInsets.only(left: 25),
+                          width: sizeWidth / 15,
+                          alignment: Alignment.center,
+                          child: (isTake.value == false)
+                              ? SizedBox(
+                                  width: sizeWidth / 16,
+                                  child: ElevatedButton(
                                     style: ElevatedButton.styleFrom(
-                                        shape: const StadiumBorder(),
-                                        backgroundColor: Colors.green),
-                                    onPressed: () async {
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return CupertinoAlertDialog(
-                                            title: Text(
-                                              'Are you sure this order is ready ?',
-                                              style: GoogleFonts.poppins(),
-                                            ),
-                                            actions: [
-                                              MaterialButton(
-                                                onPressed: () {
-                                                  if (available
-                                                      .contains(null)) {
-                                                    showToast(
-                                                        'Check The Available Before Order Ready',
-                                                        textStyle:
-                                                            GoogleFonts.poppins(
-                                                                color: Colors
-                                                                    .white),
-                                                        position:
-                                                            const ToastPosition(
-                                                                align: Alignment
-                                                                    .bottomCenter),
-                                                        backgroundColor:
-                                                            Colors.red);
-                                                  } else {
-                                                    for (int i = 0;
-                                                        i < available.length;
-                                                        i++) {
-                                                      if (available[i] ==
-                                                          false) {
-                                                        cart.qty[i] = 0;
-                                                        cart.total[i] = 0;
-                                                        cart.subTotal[i] = 0;
-                                                        cart.discount[i] = 0;
-                                                      }
-                                                    }
-                                                    setState(
-                                                      () {
-                                                        isReady = !isReady;
-                                                        orderRef
-                                                            .doc(id)
-                                                            .update(({
-                                                              'isReady':
-                                                                  isReady,
-                                                              'qty': cart.qty,
-                                                              'available':
-                                                                  available,
-                                                              'total':
-                                                                  cart.total,
-                                                              'discount':
-                                                                  cart.discount,
-                                                              'subTotal':
-                                                                  cart.subTotal
-                                                            }));
-                                                      },
-                                                    );
-                                                  }
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text(
-                                                  'Yes',
-                                                  style: GoogleFonts.poppins(),
-                                                ),
-                                              ),
-                                              MaterialButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text(
-                                                  'No',
-                                                  style: GoogleFonts.poppins(),
-                                                ),
-                                              )
-                                            ],
-                                          );
-                                        },
-                                      );
+                                        shape: const StadiumBorder()),
+                                    onPressed: () {
+                                      controller.isTake.value =
+                                          !controller.isTake.value;
+                                      isReady = !isReady;
+                                      orderRef.doc(id).update(({
+                                            'isTake': controller.isTake.value
+                                          }));
                                     },
                                     child: Text(
-                                      'Ready',
+                                      'Take',
                                       style: GoogleFonts.poppins(),
                                     ),
-                                  ));
-                      },
-                    ),
+                                  ),
+                                )
+                              : ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      shape: const StadiumBorder(),
+                                      backgroundColor: Colors.green),
+                                  onPressed: () async {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return CupertinoAlertDialog(
+                                          title: Text(
+                                            'Are you sure this order is ready ?',
+                                            style: GoogleFonts.poppins(),
+                                          ),
+                                          actions: [
+                                            MaterialButton(
+                                              onPressed: () {
+                                                if (available.contains(null)) {
+                                                  showToast(
+                                                      'Check The Available Before Order Ready',
+                                                      textStyle:
+                                                          GoogleFonts.poppins(
+                                                              color: Colors
+                                                                  .white),
+                                                      position:
+                                                          const ToastPosition(
+                                                              align: Alignment
+                                                                  .bottomCenter),
+                                                      backgroundColor:
+                                                          Colors.red);
+                                                } else {
+                                                  for (int i = 0;
+                                                      i < available.length;
+                                                      i++) {
+                                                    if (available[i] == false) {
+                                                      cart.qty[i] = 0;
+                                                      cart.total[i] = 0;
+                                                      cart.subTotal[i] = 0;
+                                                      cart.discount[i] = 0;
+                                                    }
+                                                  }
+
+                                                  isReady = !isReady;
+                                                  orderRef.doc(id).update(({
+                                                        'isReady': isReady,
+                                                        'qty': cart.qty,
+                                                        'available': available,
+                                                        'total': cart.total,
+                                                        'discount':
+                                                            cart.discount,
+                                                        'subTotal':
+                                                            cart.subTotal
+                                                      }));
+                                                }
+                                                Navigator.pop(context);
+                                              },
+                                              child: Text(
+                                                'Yes',
+                                                style: GoogleFonts.poppins(),
+                                              ),
+                                            ),
+                                            MaterialButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: Text(
+                                                'No',
+                                                style: GoogleFonts.poppins(),
+                                              ),
+                                            )
+                                          ],
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: Text(
+                                    'Ready',
+                                    style: GoogleFonts.poppins(),
+                                  ),
+                                )),
+                    )
                   ],
                 ),
               );

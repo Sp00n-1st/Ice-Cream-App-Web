@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:oktoast/oktoast.dart';
 
 class Controller extends GetxController {
   var category = Rxn<String>();
-  List<Widget> listAvalaible = <Widget>[].obs;
-  RxList<Widget> avv = <Widget>[].obs;
-  List<bool?> available = <bool?>[].obs;
-  var isAvailable = Rxn<bool>();
   var isLogin = false.obs;
   var selectedIndex = 0.obs;
   var sortField = 'firstName'.obs;
   var isAscending = false.obs;
   var isOn = false.obs;
   var isDisable = false.obs;
+  var isTake = false.obs;
 
   void showNotification(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -23,5 +21,11 @@ class Controller extends GetxController {
   void getSort(String field) {
     sortField.value = field;
     isAscending.value = !isAscending.value;
+  }
+
+  toastInputNumber(String input) {
+    showToast('Please Enter A Number Format For Input $input !',
+        backgroundColor: Colors.red,
+        position: const ToastPosition(align: Alignment.bottomCenter));
   }
 }

@@ -52,7 +52,8 @@ class ProductPage extends StatelessWidget {
             : ListView.builder(
                 itemCount: data.size,
                 itemBuilder: (context, index) => ModelProduct(
-                    id: data.docs[index].id, product: data.docs[index].data()));
+                    id: data.docs[index].id,
+                    productModel: data.docs[index].data()));
       },
     );
   }

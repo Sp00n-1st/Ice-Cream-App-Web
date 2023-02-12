@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../controller/auth_controller.dart';
 import '../controller/controller.dart';
-import '../service/database.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -12,11 +12,10 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     double sizeHeight = MediaQuery.of(context).size.height;
     double sizeWidth = MediaQuery.of(context).size.width;
-    TextEditingController emailController =
-        TextEditingController(text: 'icecream@gmail.com');
-    TextEditingController passwordController =
-        TextEditingController(text: '123456');
+    TextEditingController emailController = TextEditingController();
+    TextEditingController passwordController = TextEditingController();
     var controller = Get.put(Controller());
+    var authController = Get.put(AuthController());
 
     return Scaffold(
       //backgroundColor: const Color(0xfffad755),
@@ -129,7 +128,7 @@ class LoginPage extends StatelessWidget {
                                   try {
                                     controller.isLogin.value =
                                         !controller.isLogin.value;
-                                    await DataBaseServices().loginAdmin(
+                                    await authController.loginAdmin(
                                         context,
                                         emailController.text,
                                         passwordController.text);

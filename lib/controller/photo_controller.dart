@@ -82,4 +82,8 @@ class PhotoController extends GetxController {
     String value = await reference.getDownloadURL();
     downloadUrl!.add(value);
   }
+
+  Future<void> deleteImage(String loc) async {
+    FirebaseStorage.instance.ref().storage.refFromURL(loc).delete();
+  }
 }

@@ -5,38 +5,28 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oktoast/oktoast.dart';
+import '../controller/photo_controller.dart';
 import '../model/product.dart';
-import '../service/database.dart';
 import '../view/edit_page.dart';
 
 // ignore: must_be_immutable
-class ModelProduct extends StatefulWidget {
-  final Product product;
+class ModelProduct extends StatelessWidget {
+  final Product productModel;
   String id;
 
-  ModelProduct({Key? key, required this.id, required this.product})
+  ModelProduct({Key? key, required this.id, required this.productModel})
       : super(key: key);
-
-  @override
-  State<ModelProduct> createState() => _ModelProductState();
-}
-
-class _ModelProductState extends State<ModelProduct> {
-  @override
-  void dispose() {
-    stockController.dispose();
-    super.dispose();
-  }
 
   bool isEdit = false;
   int totalStock = 0;
   final stockController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    int stockNow = widget.product.stock;
+    int stockNow = productModel.stock;
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     CollectionReference product = firestore.collection('product');
     double sizeWidth = MediaQuery.of(context).size.width;
+    var photoController = Get.put(PhotoController());
 
     return Container(
       height: sizeWidth / 4,
@@ -64,7 +54,7 @@ class _ModelProductState extends State<ModelProduct> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(15),
                 child: Image.network(
-                  widget.product.imageUrl.elementAt(0),
+                  productModel.imageUrl.elementAt(0),
                   fit: BoxFit.cover,
                 ),
               )),
@@ -83,7 +73,7 @@ class _ModelProductState extends State<ModelProduct> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Name Product : \n${widget.product.nameProduct}',
+                        'Name Product : \n${productModel.nameProduct}',
                         style: GoogleFonts.poppins(
                             fontSize: 13, fontWeight: FontWeight.w600),
                       ),
@@ -91,26 +81,26 @@ class _ModelProductState extends State<ModelProduct> {
                         height: 10,
                       ),
                       Text(
-                        'Category : \n${widget.product.category}',
+                        'Category : \n${productModel.category}',
                         style: GoogleFonts.poppins(
                             fontSize: 13, fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(
                         height: 10,
                       ),
-                      Text('Price : \n${widget.product.price}',
+                      Text('Price : \n${productModel.price}',
                           style: GoogleFonts.poppins(
                               fontSize: 13, fontWeight: FontWeight.w600)),
                       const SizedBox(
                         height: 10,
                       ),
-                      Text('Description Item : \n${widget.product.descItem}',
+                      Text('Description Item : \n${productModel.descItem}',
                           style: GoogleFonts.poppins(
                               fontSize: 13, fontWeight: FontWeight.w600)),
                       const SizedBox(
                         height: 10,
                       ),
-                      Text('Protein : \n${widget.product.protein}',
+                      Text('Protein : \n${productModel.protein}',
                           maxLines: 4,
                           textAlign: TextAlign.justify,
                           style: GoogleFonts.poppins(
@@ -118,25 +108,25 @@ class _ModelProductState extends State<ModelProduct> {
                       const SizedBox(
                         height: 10,
                       ),
-                      Text('Calori : \n${widget.product.calori}',
+                      Text('Calori : \n${productModel.calori}',
                           style: GoogleFonts.poppins(
                               fontSize: 13, fontWeight: FontWeight.w600)),
                       const SizedBox(
                         height: 10,
                       ),
-                      Text('Carbohydrate : \n${widget.product.carbo}',
+                      Text('Carbohydrate : \n${productModel.carbo}',
                           style: GoogleFonts.poppins(
                               fontSize: 13, fontWeight: FontWeight.w600)),
                       const SizedBox(
                         height: 10,
                       ),
-                      Text('Fat : \n${widget.product.fat}',
+                      Text('Fat : \n${productModel.fat}',
                           style: GoogleFonts.poppins(
                               fontSize: 13, fontWeight: FontWeight.w600)),
                       const SizedBox(
                         height: 10,
                       ),
-                      Text('Stock : \n${widget.product.stock}',
+                      Text('Stock : \n${productModel.stock}',
                           style: GoogleFonts.poppins(
                               fontSize: 13, fontWeight: FontWeight.w600)),
                       SizedBox(
@@ -149,82 +139,78 @@ class _ModelProductState extends State<ModelProduct> {
                                     shape: const StadiumBorder(),
                                     backgroundColor: Colors.blue),
                                 onPressed: () {
-                                  setState(() {
-                                    showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return CupertinoAlertDialog(
-                                            title: const Text('Add Stock ?'),
-                                            content: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                Container(
-                                                  width: double.infinity,
-                                                  margin:
-                                                      const EdgeInsets.fromLTRB(
-                                                          0, 0, 0, 15),
-                                                  padding: const EdgeInsets
-                                                          .symmetric(
-                                                      vertical: 0,
-                                                      horizontal: 15),
-                                                  decoration: BoxDecoration(
-                                                      color: Colors.white,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              15)),
-                                                  child: Material(
-                                                    child: TextField(
-                                                      inputFormatters: [
-                                                        FilteringTextInputFormatter
-                                                            .allow(RegExp(
-                                                                "[0-9]")),
-                                                      ],
-                                                      controller:
-                                                          stockController,
-                                                      keyboardType:
-                                                          TextInputType.number,
-                                                      cursorColor: Colors.blue,
-                                                      decoration:
-                                                          const InputDecoration(
-                                                              border:
-                                                                  InputBorder
-                                                                      .none,
-                                                              hintText:
-                                                                  'Input Stock'),
-                                                    ),
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return CupertinoAlertDialog(
+                                          title: const Text('Add Stock ?'),
+                                          content: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.center,
+                                            children: [
+                                              Container(
+                                                width: double.infinity,
+                                                margin:
+                                                    const EdgeInsets.fromLTRB(
+                                                        0, 0, 0, 15),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 0,
+                                                        horizontal: 15),
+                                                decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15)),
+                                                child: Material(
+                                                  child: TextField(
+                                                    inputFormatters: [
+                                                      FilteringTextInputFormatter
+                                                          .allow(
+                                                              RegExp("[0-9]")),
+                                                    ],
+                                                    controller: stockController,
+                                                    keyboardType:
+                                                        TextInputType.number,
+                                                    cursorColor: Colors.blue,
+                                                    decoration:
+                                                        const InputDecoration(
+                                                            border: InputBorder
+                                                                .none,
+                                                            hintText:
+                                                                'Input Stock'),
                                                   ),
                                                 ),
-                                                ElevatedButton(
-                                                    style: ElevatedButton.styleFrom(
-                                                        shape:
-                                                            const StadiumBorder()),
-                                                    onPressed: () async {
-                                                      int addStock =
-                                                          int.tryParse(
-                                                                  stockController
-                                                                      .text) ??
-                                                              0;
-                                                      totalStock =
-                                                          stockNow + addStock;
-                                                      await product
-                                                          .doc(widget.id)
-                                                          .update(({
-                                                            'stock': totalStock
-                                                          }));
-                                                      showToast(
-                                                          'Add Stock Success!',
-                                                          position: const ToastPosition(
-                                                              align: Alignment
-                                                                  .bottomCenter));
-                                                      Navigator.pop(context);
-                                                    },
-                                                    child: const Text('Save'))
-                                              ],
-                                            ),
-                                          );
-                                        });
-                                  });
+                                              ),
+                                              ElevatedButton(
+                                                  style: ElevatedButton.styleFrom(
+                                                      shape:
+                                                          const StadiumBorder()),
+                                                  onPressed: () async {
+                                                    int addStock = int.tryParse(
+                                                            stockController
+                                                                .text) ??
+                                                        0;
+                                                    totalStock =
+                                                        stockNow + addStock;
+                                                    await product
+                                                        .doc(id)
+                                                        .update(({
+                                                          'stock': totalStock
+                                                        }));
+                                                    showToast(
+                                                        'Add Stock Success!',
+                                                        position:
+                                                            const ToastPosition(
+                                                                align: Alignment
+                                                                    .bottomCenter));
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: const Text('Save'))
+                                            ],
+                                          ),
+                                        );
+                                      });
                                 },
                                 child: const Icon(CupertinoIcons.add)),
                             ElevatedButton(
@@ -232,12 +218,10 @@ class _ModelProductState extends State<ModelProduct> {
                                     shape: const StadiumBorder(),
                                     backgroundColor: Colors.orange),
                                 onPressed: () {
-                                  setState(() {
-                                    Get.to(EditPage(
-                                      productModel: widget.product,
-                                      id: widget.id,
-                                    ));
-                                  });
+                                  Get.to(EditPage(
+                                    productModel: productModel,
+                                    id: id,
+                                  ));
                                 },
                                 child: const Icon(CupertinoIcons.pencil)),
                             ElevatedButton(
@@ -268,7 +252,7 @@ class _ModelProductState extends State<ModelProduct> {
                                               height: 10,
                                             ),
                                             Text(
-                                              'Are Sure To Delete ${widget.product.nameProduct} ?',
+                                              'Are Sure To Delete ${productModel.nameProduct} ?',
                                               style: GoogleFonts.poppins(
                                                   fontSize: 14),
                                             )
@@ -291,12 +275,12 @@ class _ModelProductState extends State<ModelProduct> {
                                                     fontSize: 14),
                                               ),
                                               onPressed: () {
-                                                product.doc(widget.id).delete();
-                                                DataBaseServices().deleteImage(
-                                                    widget.product.imageUrl
+                                                product.doc(id).delete();
+                                                photoController.deleteImage(
+                                                    productModel.imageUrl
                                                         .elementAt(0));
-                                                DataBaseServices().deleteImage(
-                                                    widget.product.imageUrl
+                                                photoController.deleteImage(
+                                                    productModel.imageUrl
                                                         .elementAt(1));
                                                 showToast(
                                                     'Deleted Data Successfully',

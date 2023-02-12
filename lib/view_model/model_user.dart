@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:oktoast/oktoast.dart';
+import '../controller/password_controller.dart';
+import '../controller/user_controller.dart';
 import '../model/user.dart';
-import '../service/database.dart';
 import '../view/main_view.dart';
 
 // ignore: must_be_immutable
@@ -23,6 +24,8 @@ class ModelUser extends StatelessWidget {
     double sizeWidth = MediaQuery.of(context).size.width;
     FirebaseFirestore firestore = FirebaseFirestore.instance;
     CollectionReference userCollections = firestore.collection('user');
+    var passwordController = Get.put(PasswordController());
+    var userController = Get.put(UserController());
 
     return user.isDisable == isDisable
         ? Row(
@@ -321,9 +324,9 @@ class ModelUser extends StatelessWidget {
                                           onPressed: () {
                                             var encryptPass = user.password;
                                             userCollections.doc(id).delete();
-                                            DataBaseServices().deleteUser(
+                                            userController.deleteUser(
                                                 user.email,
-                                                DataBaseServices()
+                                                passwordController
                                                     .decryptedPass(
                                                         encryptPass));
                                             showToast(

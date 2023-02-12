@@ -1,17 +1,10 @@
-import 'dart:async';
-import 'dart:io';
-import 'dart:io' show File;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_web_firebase/controller/controller.dart';
-import 'package:flutter_web_firebase/controller/photo_controller.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:oktoast/oktoast.dart';
-import 'package:uuid/uuid.dart';
+import '../controller/controller.dart';
+import '../controller/photo_controller.dart';
 import 'main_view.dart';
 import '../view_model/textbox_input.dart';
 import '../view_model/textbox_input_number.dart';
@@ -218,17 +211,17 @@ class UploadPage extends StatelessWidget {
                               stock.value.text.isNotEmpty &&
                               controller.category.value != null) {
                             if (!priceProduct.value.text.isNum) {
-                              toastInputNumber('Price');
+                              controller.toastInputNumber('Price');
                             } else if (!proGram.value.text.isNum) {
-                              toastInputNumber('Protein');
+                              controller.toastInputNumber('Protein');
                             } else if (!calGram.value.text.isNum) {
-                              toastInputNumber('Calori');
+                              controller.toastInputNumber('Calori');
                             } else if (!fatGram.value.text.isNum) {
-                              toastInputNumber('Fat');
+                              controller.toastInputNumber('Fat');
                             } else if (!carGram.value.text.isNum) {
-                              toastInputNumber('Carbo');
+                              controller.toastInputNumber('Carbo');
                             } else if (!stock.value.text.isNum) {
-                              toastInputNumber('Stock');
+                              controller.toastInputNumber('Stock');
                             } else {
                               await photoController.upload();
                               await product.add({
@@ -243,7 +236,6 @@ class UploadPage extends StatelessWidget {
                                 'carbo': double.tryParse(carGram.text) ?? 0,
                                 'stock': double.tryParse(stock.text) ?? 0,
                                 'imageUrl': photoController.downloadUrl,
-                                'imagePath': '/ProductImages/',
                               });
                               Get.offAll(MainView(
                                 position: 1,
@@ -270,11 +262,5 @@ class UploadPage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  toastInputNumber(String input) {
-    showToast('Please Enter A Number Format For Input $input !',
-        backgroundColor: Colors.red,
-        position: const ToastPosition(align: Alignment.bottomCenter));
   }
 }

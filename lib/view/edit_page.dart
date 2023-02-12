@@ -8,7 +8,6 @@ import '../controller/photo_controller.dart';
 import '../view_model/textbox_input.dart';
 import '../view_model/textbox_input_number.dart';
 import '../model/product.dart';
-import '../service/database.dart';
 import 'main_view.dart';
 
 // ignore: must_be_immutable
@@ -42,6 +41,7 @@ class EditPage extends StatelessWidget {
     var photoController = Get.put(PhotoController());
     var controller = Get.put(Controller());
     controller.category.value = null;
+    controller.category.value = productModel.category;
 
     return OKToast(
       child: Scaffold(
@@ -269,19 +269,24 @@ class EditPage extends StatelessWidget {
                                               stockController.text.isNotEmpty) {
                                             if (!priceProduct
                                                 .value.text.isNum) {
-                                              toastInputNumber('Price');
+                                              controller
+                                                  .toastInputNumber('Price');
                                             } else if (!proGram
                                                 .value.text.isNum) {
-                                              toastInputNumber('Protein');
+                                              controller
+                                                  .toastInputNumber('Protein');
                                             } else if (!calGram
                                                 .value.text.isNum) {
-                                              toastInputNumber('Calori');
+                                              controller
+                                                  .toastInputNumber('Calori');
                                             } else if (!fatGram
                                                 .value.text.isNum) {
-                                              toastInputNumber('Fat');
+                                              controller
+                                                  .toastInputNumber('Fat');
                                             } else if (!stockController
                                                 .value.text.isNum) {
-                                              toastInputNumber('Stock');
+                                              controller
+                                                  .toastInputNumber('Stock');
                                             } else {
                                               await photoController.upload();
                                               if (photoController
@@ -293,11 +298,11 @@ class EditPage extends StatelessWidget {
                                                     productModel.imageUrl
                                                         .elementAt(1));
                                               } else {
-                                                await DataBaseServices()
+                                                await photoController
                                                     .deleteImage(productModel
                                                         .imageUrl
                                                         .elementAt(0));
-                                                await DataBaseServices()
+                                                await photoController
                                                     .deleteImage(productModel
                                                         .imageUrl
                                                         .elementAt(1));
@@ -365,11 +370,5 @@ class EditPage extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  toastInputNumber(String input) {
-    showToast('Please Enter A Number Format For Input $input !',
-        backgroundColor: Colors.red,
-        position: const ToastPosition(align: Alignment.bottomCenter));
   }
 }
